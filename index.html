@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>段落 · 加粗 · 修订编辑器</title>
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 24px;
+    font: 15px/1.6 -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #f4f5f7; color: #1f2328;
+  }
+  header { max-width: 1100px; margin: 0 auto 16px; }
+  h1 { font-size: 18px; margin: 0 0 12px; }
+  .toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .toolbar button, #revisions button {
+    border: 1px solid #c9ced6; background: #fff; border-radius: 6px;
+    padding: 4px 12px; cursor: pointer; font-size: 14px;
+  }
+  .toolbar button:hover:not(:disabled), #revisions button:hover { background: #eef1f5; }
+  .toolbar button:disabled { opacity: .4; cursor: default; }
+  .toolbar button.active { background: #dbeafe; border-color: #60a5fa; }
+  .toolbar label { display: flex; gap: 4px; align-items: center; user-select: none; }
+  main {
+    max-width: 1100px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+  }
+  .pane { background: #fff; border: 1px solid #dfe3e8; border-radius: 8px; padding: 12px 16px; }
+  .pane h2 { font-size: 13px; color: #6b7280; margin: 0 0 8px; font-weight: 600; }
+  #editor { min-height: 220px; outline: none; }
+  #editor:focus { }
+  #editor p, #reading p { margin: 0 0 4px; min-height: 1.5em; }
+  .rev-ins { background: #dcfce7; text-decoration: underline; text-decoration-color: #16a34a; }
+  del.rev-del, .rev-del { color: #b91c1c; background: #fee2e2; text-decoration: line-through; }
+  #reading { min-height: 120px; }
+  #revisions { list-style: none; margin: 0; padding: 0; }
+  #revisions li { display: flex; gap: 8px; align-items: center; padding: 4px 0; }
+  #revisions li.empty { color: #9ca3af; }
+  #revisions .badge {
+    flex: none; font-size: 12px; border-radius: 4px; padding: 1px 6px; color: #fff;
+  }
+  #revisions .badge.insert { background: #16a34a; }
+  #revisions .badge.delete { background: #dc2626; }
+  #revisions .preview { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #export {
+    width: 100%; min-height: 140px; resize: vertical;
+    font: 12px/1.5 ui-monospace, monospace; border: 1px solid #dfe3e8; border-radius: 6px;
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>段落 · 加粗 · 修订编辑器</h1>
+  <div class="toolbar">
+    <button id="btn-undo" title="撤销 (Ctrl+Z)">撤销</button>
+    <button id="btn-redo" title="重做 (Ctrl+Shift+Z)">重做</button>
+    <button id="btn-bold" title="加粗 (Ctrl+B)"><strong>B</strong> 加粗</button>
+    <label><input type="checkbox" id="chk-track"> 修订模式</label>
+    <button id="btn-accept-all">接受全部</button>
+    <button id="btn-reject-all">拒绝全部</button>
+  </div>
+</header>
+<main>
+  <section class="pane">
+    <h2>编辑</h2>
+    <div id="editor" contenteditable="true" spellcheck="false"></div>
+  </section>
+  <section class="pane">
+    <h2>阅读视图（接受全部修订后的样子）</h2>
+    <div id="reading"></div>
+  </section>
+  <section class="pane">
+    <h2>修订</h2>
+    <ul id="revisions"></ul>
+  </section>
+  <section class="pane">
+    <h2>导出 HTML</h2>
+    <textarea id="export" readonly></textarea>
+  </section>
+</main>
+<script type="module" src="./src/app.js"></script>
+</body>
+</html>
