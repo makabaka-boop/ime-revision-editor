@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>修订记录编辑器</title>
+  <style>
+    body { font: 15px/1.7 system-ui, sans-serif; max-width: 860px; margin: 24px auto; padding: 0 16px; color: #1f2328; }
+    h1 { font-size: 20px; }
+    .toolbar button { margin-right: 8px; }
+    #editor {
+      border: 1px solid #d0d7de; border-radius: 8px; padding: 12px 16px;
+      min-height: 120px; outline: none; background: #fff;
+    }
+    #editor p { margin: 0 0 4px; min-height: 1.4em; }
+    #editor:focus { border-color: #0969da; }
+    .c-bold { font-weight: 700; }
+    .c-ins { text-decoration: underline; text-decoration-color: #1a7f37; color: #1a7f37; }
+    .c-del { text-decoration: line-through; text-decoration-color: #cf222e; color: #cf222e; }
+    .c-comp { background: #fff8c5; }
+    h2 { font-size: 16px; margin-top: 28px; }
+    #read { border: 1px solid #d0d7de; border-radius: 8px; padding: 12px 16px; background: #fafbfc; }
+    #read p { margin: 0 0 4px; }
+    #read ins { text-decoration: underline; color: #1a7f37; }
+    #read del { text-decoration: line-through; color: #cf222e; }
+    table { border-collapse: collapse; width: 100%; margin-top: 8px; }
+    th, td { border: 1px solid #d0d7de; padding: 6px 10px; text-align: left; }
+    th { background: #f6f8fa; }
+    button { cursor: pointer; }
+    .hint { color: #57606a; font-size: 13px; }
+    pre#export { background: #f6f8fa; padding: 10px; border-radius: 8px; overflow:auto; }
+  </style>
+</head>
+<body>
+  <h1>修订记录编辑器（段落 / 普通文字 / 加粗）</h1>
+  <p class="hint">
+    输入即产生“插入修订”，删除即产生“删除修订”；中文拼音组合在组词期间只显示临时内容，选词后才记一笔可撤销事务。
+    Ctrl/⌘+B 加粗，Ctrl/⌘+Z 撤销，Ctrl/⌘+Shift+Z 重做。粘贴内容只按纯文本进入文档。
+  </p>
+  <div class="toolbar">
+    <button id="btn-bold"><b>B</b> 加粗</button>
+    <button id="btn-undo">撤销</button>
+    <button id="btn-redo">重做</button>
+    <button data-mode="tracked">修订视图</button>
+    <button data-mode="final">最终视图</button>
+    <button data-mode="original">原始视图</button>
+  </div>
+  <div id="editor"></div>
+
+  <h2>阅读视图（与编辑器同一模型生成）</h2>
+  <div id="read"></div>
+
+  <h2>修订表</h2>
+  <div id="revs"></div>
+
+  <h2>导出</h2>
+  <div class="toolbar">
+    <button data-fmt="json">JSON</button>
+    <button data-fmt="markdown">Markdown（最终）</button>
+    <button data-fmt="html">HTML（修订视图）</button>
+  </div>
+  <pre id="export"></pre>
+
+  <script type="module">
+    import { mount } from '../src/dom-host.js';
+    import { exportDoc, modelToHtml } from '../src/render.js';
+
+    const editEl = document.getElementById('editor');
+    const readEl = document.getElementById('read');
+    const tableEl = document.getElementById('revs');
+    const exportEl = document.getElementById('export');
+
+    const { editor } = mount({ editEl, readEl, tableEl, onUpdate: refreshRead });
+    let mode = 'tracked';
+
+    function refreshRead() {
+      readEl.innerHTML = modelToHtml(editor.model, mode);
+      exportEl.textContent = exportDoc(editor.model, {
+        format: exportEl.dataset.fmt || 'json',
+        mode: exportEl.dataset.fmt === 'html' ? 'tracked' : 'final',
+      });
+    }
+    refreshRead();
+
+    document.getElementById('btn-bold').onclick = () => editor.toggleBold();
+    document.getElementById('btn-undo').onclick = () => editor.undo();
+    document.getElementById('btn-redo').onclick = () => editor.redo();
+    document.querySelectorAll('[data-mode]').forEach((b) => {
+      b.onclick = () => { mode = b.dataset.mode; refreshRead(); };
+    });
+    document.querySelectorAll('[data-fmt]').forEach((b) => {
+      b.onclick = () => { exportEl.dataset.fmt = b.dataset.fmt; refreshRead(); };
+    });
+  </script>
+</body>
+</html>

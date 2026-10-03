@@ -1,0 +1,10 @@
+{
+  "name": "track-changes-editor",
+  "version": "1.0.0",
+  "description": "仅含段落/普通文字/加粗的浏览器编辑器，支持可接受或拒绝的插入、删除修订",
+  "type": "module",
+  "scripts": {
+    "test": "node test/run.js"
+  },
+  "license": "MIT"
+}
